@@ -1,0 +1,34 @@
+name: Daily AI Orchestration (GetResponse)
+
+on:
+  schedule:
+    # Run every day at 03:00 UTC (adjust as needed)
+    - cron: '0 3 * * *'
+  workflow_dispatch:  # Shows "Run workflow" button manually
+
+jobs:
+  run-orchestrator:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run main orchestrator pipeline
+        run: node orchestrator.js
+
+      - name: Run repair orchestrator (fix / enhance articles)
+        run: node repair-orchestrator.js
+
+      - name: Notify on failure
+        if: ${{ failure() }}
+        run: |
+          echo "🛑 Orchestraor failed"
+          # You can plug in Slack / Discord / email here later if you want
