@@ -1,5 +1,0 @@
-// lib/affiliates-validator.js
-const loadRestreamAffiliates = () => [];
-const validateAffiliateLinks = (body, strategy) => body;
-
-module.exports = { loadRestreamAffiliates, validateAffiliateLinks };
