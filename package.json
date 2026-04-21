@@ -1,3 +1,5 @@
+# Create minimal package.json
+cat > package.json <<'EOF'
 {
   "name": "getresponse-ai-orchestrator",
   "version": "1.0.0",
@@ -8,3 +10,4 @@
   },
   "dependencies": {}
 }
+EOF
