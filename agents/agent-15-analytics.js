@@ -1,17 +1,17 @@
 // agents/agent-15-analytics.js
 // Agent‑15 – Analytics & Feedback Loop
-// Reads GA‑style / platform data and writes an analytics‑plan.json for Claudio
+// Reads GA‑style data and writes analytics‑plan.json for Claudio (Agent‑0)
 
 const fs = require('fs');
 const path = require('path');
 
 /**
- * Load GA‑style analytics data (or your own data‑source)
+ * Load analytics data (fake‑GA‑style for now; you can later plug real API)
  *
  * @returns {Object} analyticsData
  */
 function loadAnalyticsData() {
-  // For now, fake GA‑style data; you'll later plug real API or CSV
+  // For now, use a fake GA‑style dataset
   return {
     startDate: '2026-04-01',
     endDate: '2026-04-20',
@@ -63,8 +63,8 @@ function loadAnalyticsData() {
         ctaClicks: 160,
         conversions: 10,
       },
-      '/getresponse-review': {
-        url: '/getresponse-review',
+      '/getresponse-automation': {
+        url: '/getresponse-automation',
         impressions: 8000,
         clicks: 320,
         ctaClicks: 120,
@@ -84,20 +84,19 @@ function loadAnalyticsData() {
         ctaClicks: 60,
         conversions: 5,
       },
-      // Any pages you auto‑generate will be added here later
+      // Real pages you auto‑generate can be added here later via API
     },
   };
 }
 
 /**
- * Analyze data and extract key metrics for Claudio
+ * Analyze data and extract key metrics + insights for Claudio
  *
- * @param {Object} analyticsData – output from loadAnalyticsData
- *
- * @returns {Object} analyticsInsights
+ * @param {Object} analyticsData
+ * @returns {Object} insights
  */
 function analyzeAnalyticsData(analyticsData) {
-  const { totalImpressions, totalConversions, totalClicks, ctaClicks, channels, pages } =
+  const { totalImpressions, totalClicks, ctaClicks, totalConversions, channels, pages } =
     analyticsData;
 
   // 1. Overall funnel health
@@ -106,7 +105,7 @@ function analyzeAnalyticsData(analyticsData) {
   const performance = {
     cpa: cpa,
     cvr: cvr,
-    // Score: 0–100, 100 = elite, 0 = broken
+    // 0–100 score, 100 = elite, 0 = broken
     healthScore: 60 + (cvr > 0.02 ? 20 : 0) + (cpa < 0.05 ? 20 : 0),
   };
 
@@ -119,7 +118,7 @@ function analyzeAnalyticsData(analyticsData) {
     .filter(p => p.impressions > 500 && p.conversions === 0)
     .sort((a, b) => a.impressions - b.impressions);
 
-  // 3. Top / worst channels
+  // 3. Best / worst channels
   const channelList = Object.values(channels);
   const bestChannel = channelList
     .filter(ch => ch.impressions > 1000)
@@ -129,7 +128,9 @@ function analyzeAnalyticsData(analyticsData) {
   const insights = [];
 
   if (performance.healthScore < 70) {
-    insights.push('Overall conversion rate is low; need stronger CTAs and clearer value‑proposition.');
+    insights.push(
+      'Overall conversion rate is low; need stronger CTAs and clearer value‑proposition on landing/decision pages.'
+    );
   }
 
   if (topPages.length > 0) {
@@ -137,7 +138,7 @@ function analyzeAnalyticsData(analyticsData) {
       `✅ Top pages: ${topPages
         .slice(0, 3)
         .map(p => p.url)
-        .join(', ')} – double‑down on these with more links and social‑video scripts.`
+        .join(', ')} – double‑down on these with more internal links and social‑video scripts.`
     );
   }
 
@@ -155,11 +156,11 @@ function analyzeAnalyticsData(analyticsData) {
     );
   }
 
-  // 5. Extra flag: social‑video CTR?
-  const socialVideoCTR = 0.01; // fake placeholder; you can calc from your data
+  // 5. Social‑video CTR (fake placeholder; you can calc from your data later)
+  const socialVideoCTR = 0.01;
   if (socialVideoCTR < 0.02) {
     insights.push(
-      '📱 Social‑video CTR is low; revise hooks and CTAs in TikTok / Reels / Shorts scripts.'
+      '📱 Social‑video CTR is low; revise hooks and CTAs in TikTok / Reels / Shorts scripts to be more problem‑driven.'
     );
   }
 
@@ -169,21 +170,23 @@ function analyzeAnalyticsData(analyticsData) {
       totalClicks,
       ctaClicks,
       totalConversions,
-      cpa: cpa.toFixed(4),
-      cvr: cvr.toFixed(4),
+      cpa: parseFloat(cpa.toFixed(4)),
+      cvr: parseFloat(cvr.toFixed(4)),
       healthScore: performance.healthScore,
     },
     bestPages: topPages,
     worstPages,
     bestChannel,
     insights,
+    topAdPerformance: 0.012, // fake ad metric; you can plug real data later
+    worstAdPerformance: 0.001,
   };
 }
 
 /**
  * Safe‑write analytics insights to disk (for Claudio to read)
  *
- * @param {Object} insights – output from analyzeAnalyticsData
+ * @param {Object} insights
  */
 function safeWriteAnalyticsInsights(insights) {
   const maxRetries = 3;
@@ -203,13 +206,13 @@ function safeWriteAnalyticsInsights(insights) {
         throw err;
       }
       const delay = attempt * 1000;
-      require('timers').setTimeout(() => {}, delay).unref();
+      setTimeout(() => {}, delay).unref();
     }
   }
 }
 
 /**
- * Main entry point – run once per batch
+ * Main entry – runs once per batch
  */
 function runAnalytics() {
   const analyticsData = loadAnalyticsData();
