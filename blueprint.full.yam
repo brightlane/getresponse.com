@@ -1,0 +1,157 @@
+# blueprint.full.yaml – Claudio‑designed blueprint for GetResponse affiliate funnel
+# Includes: funnel, taxonomy, content rules, agents, and affiliate‑URL wiring
+
+domain: getresponse.com
+purpose: high‑converting affiliate SEO funnel for GetResponse email marketing
+
+product:
+  name: GetResponse
+  primaryUse: email marketing + automation + funnels + landing pages
+  affiliateLinks:
+    main: https://try.getresponsetoday.com/hjijpskj458f-p1iq8v
+    northAmerica: https://try.getresponsetoday.com/bvaetyxexyd4
+    pricing: https://try.getresponsetoday.com/zder3vacd7wn-xlkg1t
+    promo: https://try.getresponsetoday.by/g78snrw20x6x-qfgqp
+
+funnel:
+  stages:
+    - id: awareness
+      name: Awareness
+      pageTypes: [guides, how-tos]
+      ctaStyle: "Soft; information‑focused"
+    - id: consideration
+      name: Consideration
+      pageTypes: [reviews, comparisons, case-studies]
+      ctaStyle: "Medium; push toward decision"
+    - id: decision
+      name: Decision
+      pageTypes: [landing, squeeze]
+      ctaStyle: "Hard; one clear CTA above fold"
+    - id: conversion
+      name: Conversion
+      pageTypes: [pricing, bonus-promo]
+      ctaStyle: "Very hard; one CTA, no distractions"
+
+taxonomy:
+  pillars:
+    - id: email-marketing
+      name: "Email Marketing"
+      url: "/getresponse-email-marketing"
+      clusterIds: [guides, reviews, case-studies]
+    - id: automation
+      name: "Automation & Funnels"
+      url: "/getresponse-automation"
+      clusterIds: [automation-guides, funnel-blueprints]
+    - id: pricing
+      name: "Pricing & Plans"
+      url: "/getresponse-pricing"
+      clusterIds: [pricing-guides, free-trial]
+    - id: alternatives
+      name: "GetResponse Alternatives"
+      url: "/getresponse-alternatives"
+      clusterIds: [alternatives-comparisons]
+
+  clusters:
+    - id: guides
+      name: "Guides"
+      parentPillar: "email-marketing"
+      pagePurpose: "Answer how‑to questions for beginners"
+      exampleSlugs:
+        - "/getresponse-email-marketing-guide"
+        - "/getresponse-autoresponder-setup"
+    - id: reviews
+      name: "Reviews"
+      parentPillar: "email-marketing"
+      pagePurpose: "Full review of GetResponse"
+    - id: case-studies
+      name: "Case Studies"
+      parentPillar: "email-marketing"
+      pagePurpose: "Show before‑after results"
+    - id: automation-guides
+      name: "Automation Guides"
+      parentPillar: "automation"
+    - id: funnel-blueprints
+      name: "Funnel Blueprints"
+      parentPillar: "automation"
+    - id: pricing-guides
+      name: "Pricing Guides"
+      parentPillar: "pricing"
+    - id: free-trial
+      name: "Free Trial Pages"
+      parentPillar: "pricing"
+    - id: alternatives-comparisons
+      name: "Alternatives Comparisons"
+      parentPillar: "alternatives"
+
+contentRules:
+  pageTypes:
+    - id: guide
+      wordCountRange: "1200-2000"
+      ctaPositions: [above-fold, mid-content, end-of-page]
+    - id: review
+      wordCountRange: "800-1500"
+      ctaPositions: [mid-content, end-of-page]
+    - id: case-study
+      wordCountRange: "1000-1800"
+      ctaPositions: [middle-of-page, end-of-page]
+    - id: landing
+      wordCountRange: "800-1200"
+      ctaPositions: [above-fold, end-of-page]
+    - id: bonus-promo
+      wordCountRange: "300-800"
+      ctaPositions: [above-fold]
+
+  seoRules:
+    minWordCount: 600
+    maxWordCount: 3000
+    primaryKeywordPerPage: 1
+    internalLinksPerPage: 3
+    externalLinksPerPage: 2
+
+agents:
+  - id: agent-0-claudio
+    role: "Chief Strategist AI"
+    instructions:
+      - "Read funnel + taxonomy + traffic + conversion metrics"
+      - "Decide which pages are most important for conversions right now"
+      - "Tell Agent‑4 to write, rewrite, or stop certain pages"
+  - id: agent-4-writer
+    role: "Article Writer"
+    instructions:
+      - "Write pages matching pageTypes and contentRules"
+      - "Use primary keyword in title, H1, first paragraph, meta‑desc"
+      - "Insert primary affiliateUrl as CTA button above fold and text‑link mid‑content"
+      - "If Claudio flags a page as underperforming, rewrite it with stronger CTAs"
+
+reliability:
+  maxRetriesPerStep: 3
+  defaultTimeoutSec: 30
+
+# Affiliate‑URL schema – every page must have affiliateUrl
+schemas:
+  agent-4-writer-output:
+    required:
+      - title
+      - body
+      - primaryKeyword
+      - affiliateUrl
+    optional:
+      - secondaryKeywords
+      - internalLinks
+    constraints:
+      title:
+        type: string
+        minLength: 10
+        maxLength: 70
+      body:
+        type: string
+        minLength: 500
+      primaryKeyword:
+        type: string
+        nonEmpty: true
+      affiliateUrl:
+        type: string
+        format: uri
+        allowedDomains:
+          - getresponsetoday.com
+          - getresponse.com
