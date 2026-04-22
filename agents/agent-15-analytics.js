@@ -117,4 +117,110 @@ function analyzeAnalyticsData(analyticsData) {
     .sort((a, b) => b.conversions - a.conversions);
   const worstPages = pageList
     .filter(p => p.impressions > 500 && p.conversions === 0)
-    .sort((a, b) => 
+    .sort((a, b) => a.impressions - b.impressions);
+
+  // 3. Top / worst channels
+  const channelList = Object.values(channels);
+  const bestChannel = channelList
+    .filter(ch => ch.impressions > 1000)
+    .sort((a, b) => a.cpa - b.cpa)[0]?.name;
+
+  // 4. Actionable insights (Claudio‑style)
+  const insights = [];
+
+  if (performance.healthScore < 70) {
+    insights.push('Overall conversion rate is low; need stronger CTAs and clearer value‑proposition.');
+  }
+
+  if (topPages.length > 0) {
+    insights.push(
+      `✅ Top pages: ${topPages
+        .slice(0, 3)
+        .map(p => p.url)
+        .join(', ')} – double‑down on these with more links and social‑video scripts.`
+    );
+  }
+
+  if (worstPages.length > 0) {
+    insights.push(
+      `❌ Worst pages: ${worstPages
+        .map(p => p.url)
+        .join(', ')} – consider rewriting or merging them.`
+    );
+  }
+
+  if (bestChannel) {
+    insights.push(
+      `💡 Best channel: ${bestChannel} – shift more budget here and scale content that feeds it.`
+    );
+  }
+
+  // 5. Extra flag: social‑video CTR?
+  const socialVideoCTR = 0.01; // fake placeholder; you can calc from your data
+  if (socialVideoCTR < 0.02) {
+    insights.push(
+      '📱 Social‑video CTR is low; revise hooks and CTAs in TikTok / Reels / Shorts scripts.'
+    );
+  }
+
+  return {
+    overview: {
+      totalImpressions,
+      totalClicks,
+      ctaClicks,
+      totalConversions,
+      cpa: cpa.toFixed(4),
+      cvr: cvr.toFixed(4),
+      healthScore: performance.healthScore,
+    },
+    bestPages: topPages,
+    worstPages,
+    bestChannel,
+    insights,
+  };
+}
+
+/**
+ * Safe‑write analytics insights to disk (for Claudio to read)
+ *
+ * @param {Object} insights – output from analyzeAnalyticsData
+ */
+function safeWriteAnalyticsInsights(insights) {
+  const maxRetries = 3;
+  const outDir = path.join(__dirname, '..', 'output', 'analytics');
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
+  const filepath = path.join(outDir, 'analytics-plan.json');
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      fs.writeFileSync(filepath, JSON.stringify(insights, null, 2), 'utf8');
+      console.log(`✅ Agent‑15: wrote analytics plan ${filepath}`);
+      return filepath;
+    } catch (err) {
+      console.error(`❌ Agent‑15: write failed (attempt ${attempt}): ${err.message}`);
+      if (attempt === maxRetries) {
+        throw err;
+      }
+      const delay = attempt * 1000;
+      require('timers').setTimeout(() => {}, delay).unref();
+    }
+  }
+}
+
+/**
+ * Main entry point – run once per batch
+ */
+function runAnalytics() {
+  const analyticsData = loadAnalyticsData();
+  const insights = analyzeAnalyticsData(analyticsData);
+  safeWriteAnalyticsInsights(insights);
+  return insights;
+}
+
+module.exports = {
+  loadAnalyticsData,
+  analyzeAnalyticsData,
+  safeWriteAnalyticsInsights,
+  runAnalytics,
+};
